@@ -1,0 +1,37 @@
+﻿trigger:
+  - main
+
+resources:
+  pipelines:
+  - pipeline: myBuildPipeline            # Alias for the build pipeline
+    source: MyProject.MyBuildPipeline   # Format: ProjectName.PipelineName
+    trigger:
+      branches:
+        include:
+          - main                        # Trigger this pipeline when 'main' of the build pipeline runs
+
+stages:
+- stage: DeployToEC2
+  displayName: 'Deploy to EC2 Instance'
+  jobs:
+  - deployment: DeployApp
+    displayName: 'Deploy Application'
+    environment: 'EC2DeploymentEnvironment'  # Optional: for environment tracking
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: myBuildPipeline    # Downloads the 'drop' artifact
+            artifact: drop
+
+          - task: SSH@0
+            displayName: 'Deploy via SSH to EC2'
+            inputs:
+              sshEndpoint: 'MyEC2SSHConnection'  # Predefined service connection in Azure DevOps
+              commands: |
+                echo "Cleaning up existing deployment..."
+                sudo rm -rf /var/www/html/*
+                echo "Copying new files..."
+                sudo cp -r $(Pipeline.Workspace)/myBuildPipeline/drop/* /var/www/html/
+                echo "Restarting service..."
+                sudo systemctl restart nginx     # Or apache2 or your custom service

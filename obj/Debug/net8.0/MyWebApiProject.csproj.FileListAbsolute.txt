@@ -1,0 +1,8 @@
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.csproj.AssemblyReference.cache
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.AssemblyInfoInputs.cache
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.AssemblyInfo.cs
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.csproj.CoreCompileInputs.cache
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.MvcApplicationPartsAssemblyInfo.cache
