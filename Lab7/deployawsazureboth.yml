@@ -1,0 +1,122 @@
+﻿trigger:
+  - master
+
+stages:
+  - stage: Build
+    displayName: Build .Net Core Solution
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+
+        variables:
+          # Set these to your own values
+          awsRegion: 'us-east-1'
+          awsAccessKey: $(AWS_ACCESS_KEY_ID)
+          awsSecretKey: $(AWS_SECRET_ACCESS_KEY)
+          ec2IpAddress: '35.176.5.106'
+          ec2User: 'ec2-user'  # Modify for your EC2 user
+          remotePath: '/var/www/milanapi'
+          zipFile: 'MyWebApiProject.zip'
+
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore Packages'
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build Project'
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration Release'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Run Tests'
+            inputs:
+              command: 'test'
+              projects: '**/*Tests.csproj'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Web Project'
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'drop'
+
+          # Step 6: Debugging - List Artifact Directory
+          - script: |
+              echo "Listing files in $(Build.ArtifactStagingDirectory)"
+              ls -al $(Build.ArtifactStagingDirectory)
+            displayName: 'List Artifact Directory'
+
+          # Step 6: Copy the ZIP file to EC2 instance (using SSH Endpoint)
+          - task: CopyFilesOverSSH@0
+            displayName: 'Copy ZIP file to EC2 using SSH'
+            inputs:
+              sshEndpoint: 'awssshconnection'  # Name of the SSH service connection you created
+              sourceFolder: '$(Build.ArtifactStagingDirectory)'
+              contents: 'MyWebApiProject.zip'
+              targetFolder: '/tmp'
+
+          # Step 7: SSH into EC2 and deploy the application
+          - task: SSH@0
+            displayName: 'Deploy and Run API on EC2'
+            inputs:
+              sshEndpoint: 'awssshconnection'  # Name of the SSH service connection
+              runOptions: 'inline'
+              inline: |
+                # Create the target directory if it doesn't exist
+                sudo mkdir -p $(remotePath)
+                
+                # Unzip the project files into /var/www/milanapi
+                sudo unzip -o /tmp/$(zipFile) -d $(remotePath)
+                
+                # Change directory to where the app is published
+                cd $(remotePath)
+                
+                # Run the .NET Core application
+                nohup dotnet MyWebApiProject.dll > output.log 2>&1 &
+
+                # Clean up /tmp folder after deployment
+                sudo rm -rf /tmp/*
+                echo "Cleaned up /tmp folder"
+
+  - stage: Deploy
+    displayName: Deploy to an Azure Web App
+    jobs:
+      - job: Deploy
+        pool:
+          vmImage: "windows-latest"
+          
+        steps:
+
+          - script: |
+              echo "Listing files in $(Build.ArtifactStagingDirectory)"
+              ls -al $(Build.ArtifactStagingDirectory)
+            displayName: 'List Artifact Directory'
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'drop'
+              downloadPath: '$(System.ArtifactsDirectory)'
+          - script: |
+              echo "Listing files in $(System.ArtifactsDirectory)"
+              ls -al $(System.ArtifactsDirectory)/drop
+            displayName: 'List Files in Artifact Directory'
+          - task: AzureRmWebAppDeployment@5
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'azure subs'
+              appType: 'webApp'
+              WebAppName: 'eshoponWebYAML54820900'
+              packageForLinux: '$(System.DefaultWorkingDirectory)/**/*MyWebApiProject.zip'

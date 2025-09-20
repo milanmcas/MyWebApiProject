@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="awspipeline\Lab7_CI_CD.yml" />
+    <Compile Include="Lab7\OneGoCI_CD.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.19" />
   </ItemGroup>
 
