@@ -32,3 +32,4 @@ C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\refint\MyWebApiProje
 C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.pdb
 C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\MyWebApiProject.genruntimeconfig.cache
 C:\Users\mgcli\Milan\az400\MyWebApiProject\obj\Debug\net8.0\ref\MyWebApiProject.dll
+C:\Users\mgcli\Milan\az400\MyWebApiProject\bin\Debug\net8.0\infra\main.parameters.json
